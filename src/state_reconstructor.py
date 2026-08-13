@@ -23,7 +23,7 @@ def inverse_estimator(counts: Array) -> Array:
 
 def mle(counts: Array) -> Array:
     """
-    Estimate the state using maximal likelyhood estimator.
+    Estimate the state using maximal likelihood estimator.
 
     Parameters
     ----------

@@ -31,8 +31,8 @@ def pauli_measurement(rho: Array, N: int) -> Array:
 
             ``counts[i] = [c(+, +), c(+, -), c(-, +), c(-, -)]``,
 
-        where c(x, x) represents number of times outcome (x, x) was observed
-        for the i-th measurement setting.
+        where c(x, y) represents number of times outcome (x, y) was observed
+        with the i-th measurement setting.
     """
     xp = array_api_compat.array_namespace(rho)
     counts = Array() # dummy
