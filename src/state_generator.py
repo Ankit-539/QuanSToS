@@ -43,7 +43,7 @@ def get_random_haar(n: int, xp: ArrayNamespace, rng) -> Array:
     rho : (``2**n``, ``2**n``) Array
         Density matrix of a random state.
     """
-     dimension = 2 ** n
+    dimension = 2**n
     real = rng.normal(0.0, 1.0, dimension)
     imaginary = rng.normal(0.0, 1.0, dimension)
     real = xp.asarray(real)
