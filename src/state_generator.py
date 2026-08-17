@@ -29,7 +29,7 @@ def get_random_product(n: int, xp: ArrayNamespace, rng) -> Array:
     pass
 
 
-def get_random_haar(n: int) -> Array:
+def get_random_haar(n: int, xp: ArrayNamespace, rng) -> Array:
     """
     Generate a Haar-random state on ``n`` qubits.
 
