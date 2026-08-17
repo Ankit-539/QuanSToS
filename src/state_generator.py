@@ -26,7 +26,7 @@ def get_random_product(n: int, xp: ArrayNamespace, rng) -> Array:
         psi_product = xp.reshape(psi_product[:, None] * psi[None, :], (-1,))
     rho = xp.outer(psi_product, xp.conj(psi_product))
     return rho
-    pass
+    
 
 
 def get_random_haar(n: int, xp: ArrayNamespace, rng) -> Array:
@@ -52,7 +52,7 @@ def get_random_haar(n: int, xp: ArrayNamespace, rng) -> Array:
     psi_haar = z / xp.linalg.vector_norm(z)
     rho = xp.outer(psi_haar, xp.conj(psi_haar))
     return rho
-    pass
+    
 
 
 def get_random_mixed(n: int) -> Array:
