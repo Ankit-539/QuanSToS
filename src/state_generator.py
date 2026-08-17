@@ -1,7 +1,7 @@
 from array_api.latest import Array
 
 
-def get_random_product(n: int) -> Array:
+def get_random_product(n: int, xp: ArrayNamespace, rng) -> Array:
     """
     Generate a random product state on ``n`` qubits.
 
