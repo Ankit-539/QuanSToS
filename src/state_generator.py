@@ -43,6 +43,15 @@ def get_random_haar(n: int) -> Array:
     rho : (``2**n``, ``2**n``) Array
         Density matrix of a random state.
     """
+     dimension = 2 ** n
+    real = rng.normal(0.0, 1.0, dimension)
+    imaginary = rng.normal(0.0, 1.0, dimension)
+    real = xp.asarray(real)
+    imaginary = xp.asarray(imaginary)
+    z = real + 1j * imaginary
+    psi_haar = z / xp.linalg.vector_norm(z)
+    rho = xp.outer(psi_haar, xp.conj(psi_haar))
+    return rho
     pass
 
 
