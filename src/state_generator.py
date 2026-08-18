@@ -1,4 +1,4 @@
-from array_api.latest import Array
+from array_api.latest import Array, ArrayNamespace
 
 
 def get_random_product(n: int, xp: ArrayNamespace, rng) -> Array:

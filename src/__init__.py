@@ -11,5 +11,6 @@ from .utils import (
     fidelity
 )
 from .virtual_measurement_simulator import (
-    pauli_measurement
+    pauli_measurement,
+    plot_counts
 )
