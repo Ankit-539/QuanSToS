@@ -33,7 +33,8 @@ def inverse_estimator(counts: Array) -> Array:
 
     # Sanity checks
     assert ex[0] == 1
-    assert ex[5] == sum(p[5][j] * (-1)**j.bit_count() for j in range(2**n))
+    if n > 1:
+        assert ex[5] == sum(p[0][j] * (-1)**j.bit_count() for j in range(2**n))
 
     return _reconstruct_state(ex, n)
 
@@ -85,17 +86,15 @@ def _correlations(p: Array, n: int) -> Array:
             correlations[0, 2, 0, 1] = <IZ>
             correlations[0, 2, 1, 1] = <XZ>
     """
-    xp = p.__array_namespace__()
+    xp = array_api_compat.array_namespace(p)
 
     p = xp.reshape(p, (3,) * n + (2,) * n)
-    zero = xp.asarray([0])
-    one = xp.asarray([1])
 
     for q in range(n):
         axis = n + q
 
-        plus = xp.take(p, zero, axis=axis)
-        minus = xp.take(p, one, axis=axis)
+        plus = xp.take(p, 0, axis=axis)
+        minus = xp.take(p, 1, axis=axis)
 
         p = xp.stack(
             (plus + minus, plus - minus),
@@ -131,7 +130,7 @@ def _pauli_expectations(correlations: Array, n: int) -> Array:
         contains the estimated expectation value of the Pauli string
         corresponding to the base-4 representation of ``i``.
     """
-    xp = correlations.__array_namespace__()
+    xp = array_api_compat.array_namespace(correlations)
 
     T = xp.asarray([
         [[1 / 3, 0], [1 / 3, 0], [1 / 3, 0]],
@@ -177,7 +176,7 @@ def _reconstruct_state(expectations: Array, n: int) -> Array:
         Linear-inversion estimate of the density matrix with shape
         ``(2**n, 2**n).
     """
-    xp = expectations.__array_namespace__()
+    xp = array_api_compat.array_namespace(expectations)
 
     paulis = xp.asarray([
         [[1, 0],

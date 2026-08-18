@@ -1,5 +1,8 @@
+from typing import Any
+
 from array_api.latest import Array, ArrayNamespace
 import numpy as np
+
 
 def get_random_product(n: int, xp: ArrayNamespace, rng) -> Array:
     """
@@ -16,17 +19,16 @@ def get_random_product(n: int, xp: ArrayNamespace, rng) -> Array:
         Density matrix of a random state.
     """
     psi_product = xp.asarray([1.0 + 0j])
-for _ in range(n):
-    u = rng.uniform(-1.0, 1.0)
-    phi = rng.uniform(0.0, 2.0 * np.pi)
-    u = xp.asarray(u)
-    phi = xp.asarray(phi)
-    theta = xp.arccos(u)
-    psi = xp.stack([xp.cos(theta / 2), xp.exp(1j * phi) * xp.sin(theta / 2)])
-    psi_product = xp.reshape(psi_product[:, None] * psi[None, :], (-1,))
-rho = xp.outer(psi_product, xp.conj(psi_product))
-return rho
-    pass
+    for _ in range(n):
+        u = rng.uniform(-1.0, 1.0)
+        phi = rng.uniform(0.0, 2.0 * np.pi)
+        u = xp.asarray(u)
+        phi = xp.asarray(phi)
+        theta = xp.arccos(u)
+        psi = xp.stack([xp.cos(theta / 2), xp.exp(1j * phi) * xp.sin(theta / 2)])
+        psi_product = xp.reshape(psi_product[:, None] * psi[None, :], (-1,))
+    rho = xp.outer(psi_product, xp.conj(psi_product))
+    return rho
 
 
 def get_random_haar(n: int, xp: ArrayNamespace, rng) -> Array:
