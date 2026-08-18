@@ -82,9 +82,9 @@ def pauli_measurement(rho: Array, N: int) -> Array:
         probabilities = probabilities / xp.sum(probabilities)
 
         # Multinomial sampling
-        numpy_probabilities = array_api_compat.to_numpy(probabilities)
+        numpy_probabilities = np.asarray(probabilities)
         sampled_counts_np = np.random.multinomial(N, numpy_probabilities.tolist())
-        sampled_counts_xp = array_api_compat.asarray(sampled_counts_np, dtype=xp.int64, device=rho.device)
+        sampled_counts_xp = xp.asarray(sampled_counts_np, dtype=xp.int64, device=rho.device)
 
         count_rows.append(sampled_counts_xp)
 
