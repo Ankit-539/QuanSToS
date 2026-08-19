@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 from array_api.latest import Array, ArrayNamespace
 import numpy as np
 
@@ -66,7 +64,7 @@ def get_random_haar(n: int, xp: ArrayNamespace) -> Array:
     return rho
 
 
-def get_random_mixed(n: int, xp: ArrayNamespace, rng) -> Array:
+def get_random_mixed(n: int, xp: ArrayNamespace) -> Array:
     """
     Generate a random mixed state on ``n`` qubits.
 
