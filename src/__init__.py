@@ -14,3 +14,7 @@ from .virtual_measurement_simulator import (
     pauli_measurement,
     plot_counts
 )
+
+from .helper import (
+    bloch_vector
+)
