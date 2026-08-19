@@ -49,7 +49,7 @@ def get_random_haar(n: int, xp: ArrayNamespace, rng) -> Array:
     real = xp.asarray(real)
     imaginary = xp.asarray(imaginary)
     z = real + 1j * imaginary
-    psi_haar = z / xp.linalg.vector_norm(z)
+    psi_haar = psi_haar = z / xp.sqrt(xp.sum(xp.abs(z) ** 2))
     rho = xp.outer(psi_haar, xp.conj(psi_haar))
     return rho
 
