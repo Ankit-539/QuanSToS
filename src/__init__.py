@@ -2,6 +2,7 @@ from .state_generator import (
     get_random_haar,
     get_random_mixed,
     get_random_product,
+    get_random_product_pole_biased
 )
 from .state_reconstructor import (
     inverse_estimator,

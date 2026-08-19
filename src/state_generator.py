@@ -77,3 +77,35 @@ def get_random_mixed(n: int, xp: ArrayNamespace, rng) -> Array:
     rho = xp.matmul(z, xp.conj(xp.matrix_transpose(z)))
     rho = rho / xp.trace(rho)
     return rho
+
+def get_random_product_pole_biased(n: int, xp: ArrayNamespace, rng) -> Array:
+    """
+    Generate a random product state on ``n`` qubits, with each
+    single-qubit state sampled uniformly in theta and phi.
+
+    Parameters
+    ----------
+    n : int
+        Number of qubits.
+
+    Returns
+    -------
+    rho : (``2**n``, ``2**n``) Array
+        Density matrix of a random state.
+    """
+    psi_product = xp.asarray([1.0 + 0j])
+
+    for _ in range(n):
+
+        theta = rng.uniform(0.0, np.pi)
+        phi = rng.uniform(0.0, 2.0 * np.pi)
+
+        theta = xp.asarray(theta)
+        phi = xp.asarray(phi)
+
+        psi = xp.stack([xp.cos(theta/2), xp.exp(1j*phi)*xp.sin(theta/2)])
+        psi_product = xp.kron(psi_product, psi)
+
+    rho = xp.outer(psi_product, xp.conj(psi_product))
+
+    return rho
