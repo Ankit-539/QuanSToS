@@ -81,6 +81,35 @@ def to_numpy(array):
 
     return np.asarray(array)
 
+def multinomial(rng, N, probabilities, xp):
+    """
+    Draw samples from a multinomial distribution.
+
+    Parameters
+    ----------
+    rng : backend-specific random number generator
+        Random number generator for the selected backend.
+    N : int
+        Number of samples.
+    probabilities : Array
+        Probability vector.
+    xp : ArrayNamespace
+        Array API namespace.
+
+    Returns
+    -------
+    counts : Array
+        Sampled counts.
+    """
+
+    if xp.__name__ == "numpy":
+        return xp.asarray(rng.multinomial(N, probabilities))
+
+    if xp.__name__ == "cupy":
+        return rng.multinomial(N, probabilities)
+
+    raise NotImplementedError(f"Multinomial sampling is not implemented for {xp.__name__}")
+
 def pauli_measurement(rho: Array, N: int) -> PauliMeasurementResult:
     """
     For an n-qubit state ρ (``rho``), the function constructs all
