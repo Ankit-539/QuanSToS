@@ -142,9 +142,7 @@ def pauli_measurement(rho: Array, N: int, rng) -> PauliMeasurementResult:
     dim = rho.shape[0]
     n = int(math.log2(dim))
 
-    # ---------------------------------------------------------
-    # Define Pauli matrices
-    # ---------------------------------------------------------
+    # Defining Pauli matrices
 
     I = xp.asarray([[1, 0], [0, 1]], dtype=rho.dtype, device=rho.device)
 
@@ -154,37 +152,12 @@ def pauli_measurement(rho: Array, N: int, rng) -> PauliMeasurementResult:
 
     Z = xp.asarray([[1, 0], [0, -1]], dtype=rho.dtype, device=rho.device)
 
-    # ---------------------------------------------------------
-    # Construct projectors
-    #
-    # projectors[pauli, outcome]
-    #
-    # pauli:
-    #     0 -> X
-    #     1 -> Y
-    #     2 -> Z
-    #
-    # outcome:
-    #     0 -> +
-    #     1 -> -
-    # ---------------------------------------------------------
-
+    # Constructing projectors
     paulis = xp.stack([X, Y, Z])
 
     projectors = xp.stack([ (I + paulis)/2, (I - paulis)/2], axis=1)
 
-    # Shape:
-    # (3, 2, 2, 2)
-    #
-    #       pauli
-    #          ↓
-    # projectors[p, s, i, j]
-    #
-    # where s is +/-
-
-    # ---------------------------------------------------------
     # Generate measurement labels
-    # ---------------------------------------------------------
 
     measurements = generate_pauli_measurements(n)
     outcomes = generate_measurement_outcomes(n)
@@ -197,22 +170,10 @@ def pauli_measurement(rho: Array, N: int, rng) -> PauliMeasurementResult:
 
     count_rows = []
 
-    # =========================================================
     # Loop over measurement SETTINGS
-    # =========================================================
-
     for pauli_string in pauli_strings:
 
-        # -----------------------------------------------------
-        # First qubit
-        # -----------------------------------------------------
-
-        # Shape:
-        #
-        # (2, 2, 2)
-        #
-        #   outcome, row, column
-        #
+        # First qubit  
         projector_stack = projectors[pauli_string[0]]
 
         # Current number of outcomes
@@ -221,41 +182,12 @@ def pauli_measurement(rho: Array, N: int, rng) -> PauliMeasurementResult:
         # Current matrix dimension
         matrix_dim = 2
 
-        # -----------------------------------------------------
-        # Add remaining qubits
-        #
-        # IMPORTANT:
-        # There is NO loop over measurement outcomes here.
-        #
-        # All 2^n projectors are constructed simultaneously.
-        # -----------------------------------------------------
-
         for pauli_idx in pauli_string[1:]:
 
             local_projectors = projectors[pauli_idx]
 
-            # projector_stack:
-            #
-            # (num_outcomes, d, d)
-            #
-            # local_projectors:
-            #
-            # (2, 2, 2)
-            #
-            # Result:
-            #
-            # (num_outcomes, 2, d, 2, d)
-            #
             combined = xp.einsum("aij,bkl->abikjl", projector_stack, local_projectors)
 
-            # Combine the two outcome axes
-            #
-            # (num_outcomes * 2, ...)
-            #
-            # and combine the two matrix axes:
-            #
-            # (d * 2, d * 2)
-            #
             num_outcomes *= 2
             matrix_dim *= 2
 
@@ -267,32 +199,6 @@ def pauli_measurement(rho: Array, N: int, rng) -> PauliMeasurementResult:
                 )
             )
 
-        # -----------------------------------------------------
-        # At this point:
-        #
-        # projector_stack.shape =
-        #
-        # (2^n, 2^n, 2^n)
-        #
-        # Every possible measurement outcome has its projector.
-        #
-        # projector_stack[k] is the projector corresponding to
-        # outcome k.
-        # -----------------------------------------------------
-
-        # -----------------------------------------------------
-        # Calculate ALL probabilities simultaneously
-        #
-        # p_k = Tr(rho P_k)
-        #
-        # Instead of:
-        #
-        # for k in range(2**n):
-        #     trace(rho @ P_k)
-        #
-        # we perform one tensor contraction.
-        # -----------------------------------------------------
-
         probabilities = xp.real(
             xp.einsum(
                 "ij,kji->k",
@@ -301,16 +207,9 @@ def pauli_measurement(rho: Array, N: int, rng) -> PauliMeasurementResult:
             )
         )
 
-        # -----------------------------------------------------
-        # Normalize probabilities
-        # -----------------------------------------------------
-
         probabilities = probabilities / xp.sum(probabilities)
 
-        # -----------------------------------------------------
         # Multinomial sampling
-        # -----------------------------------------------------
-
         sampled_counts = multinomial(rng, N, probabilities,
             xp
         )
@@ -319,16 +218,9 @@ def pauli_measurement(rho: Array, N: int, rng) -> PauliMeasurementResult:
 
     counts = xp.stack(count_rows)
 
-    assert xp.all(
-        xp.sum(counts, axis=-1) == N
-    )
+    assert xp.all(xp.sum(counts, axis=-1) == N)
 
-    return PauliMeasurementResult(
-        measurements=measurements,
-        outcomes=outcomes,
-        counts=counts,
-        N=N
-    )
+    return PauliMeasurementResult(measurements=measurements, outcomes=outcomes, counts=counts, N=N)
 
 def print_counts(result: PauliMeasurementResult) -> None:
     """
