@@ -1,5 +1,8 @@
 from array_api.latest import Array, ArrayNamespace
 import array_api_compat
+import numpy as np
+import cupy as cp
+import time
 
 def bloch_vector(rho):
     """
@@ -15,3 +18,68 @@ def bloch_vector(rho):
     z = xp.real(xp.trace(rho @ Z))
 
     return xp.stack([x, y, z])
+
+def benchmark_function(func, n_values, xp, rng, repeats=10):
+    """
+    Benchmark a state-generation function for different numbers of qubits.
+
+    Parameters
+    ----------
+    func : callable
+        State generation function.
+    n_values : iterable
+        Numbers of qubits to benchmark.
+    xp : ArrayNamespace
+        NumPy or CuPy namespace.
+    rng :
+        Random number generator.
+    repeats : int
+        Number of repetitions for each n.
+
+    Returns
+    -------
+    times : list[float]
+        Average runtime in milliseconds.
+    """
+
+    times = []
+
+    for n in n_values:
+
+        # Warm-up
+        rho = func(n, xp, rng)
+
+        if xp is cp:
+            cp.cuda.Stream.null.synchronize()
+
+        run_times = []
+
+        for _ in range(repeats):
+
+            if xp is cp:
+                start = cp.cuda.Event()
+                end = cp.cuda.Event()
+
+                start.record()
+
+                rho = func(n, xp, rng)
+
+                end.record()
+                end.synchronize()
+
+                elapsed_ms = cp.cuda.get_elapsed_time(start, end)
+
+            else:
+                start = time.perf_counter()
+
+                rho = func(n, xp, rng)
+
+                end = time.perf_counter()
+
+                elapsed_ms = (end - start) * 1000
+
+            run_times.append(elapsed_ms)
+
+        times.append(np.mean(run_times))
+
+    return times

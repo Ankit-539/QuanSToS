@@ -17,5 +17,6 @@ from .virtual_measurement_simulator import (
 )
 
 from .helper import (
-    bloch_vector
+    bloch_vector,
+    benchmark_function
 )
