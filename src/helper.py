@@ -131,3 +131,65 @@ def benchmark_pauli_measurement(func, rho, N, xp, rng, repeats=5):
         times.append((end - start) * 1000)
 
     return np.mean(times)
+
+import time
+import numpy as np
+import cupy as cp
+
+
+def benchmark_estimator(estimator, counts_dict, xp, repeats=10):
+    """
+    Benchmark a state estimator for pre-generated measurement counts.
+
+    Parameters
+    ----------
+    estimator : callable
+        Estimator function, e.g. inverse_estimator.
+
+    counts_dict : dict
+        Dictionary mapping n -> counts array.
+
+    xp : array namespace
+        NumPy or CuPy backend.
+
+    repeats : int
+        Number of timed repetitions.
+
+    Returns
+    -------
+    results : dict
+        Dictionary mapping n -> mean runtime in milliseconds.
+    """
+
+    results = {}
+
+    for n, counts in counts_dict.items():
+
+        estimator(counts)
+
+        if xp is cp:
+            cp.cuda.Stream.null.synchronize()
+
+        times = []
+
+        for _ in range(repeats):
+
+            if xp is cp:
+                cp.cuda.Stream.null.synchronize()
+
+            start = time.perf_counter()
+
+            estimator(counts)
+
+            if xp is cp:
+                cp.cuda.Stream.null.synchronize()
+
+            end = time.perf_counter()
+
+            times.append((end - start) * 1000)
+
+        results[n] = np.mean(times)
+
+        print(f"n={n:2d}: "f"{results[n]:.4f} ms")
+
+    return results

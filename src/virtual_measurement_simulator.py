@@ -114,11 +114,7 @@ def multinomial(rng, N, probabilities, xp):
         f"Multinomial sampling is not implemented for {xp.__name__}"
     )
 
-def pauli_measurement(
-    rho: Array,
-    N: int,
-    rng
-) -> PauliMeasurementResult:
+def pauli_measurement(rho: Array, N: int, rng) -> PauliMeasurementResult:
     """
     For an n-qubit state ρ (``rho``), construct all 3^n Pauli
     measurements and simulate their outcomes N times.
@@ -141,12 +137,7 @@ def pauli_measurement(
         and observed counts.
     """
 
-    # Get the array namespace associated with rho
     xp = array_api_compat.array_namespace(rho)
-
-    # ---------------------------------------------------------
-    # Find number of qubits
-    # ---------------------------------------------------------
 
     dim = rho.shape[0]
     n = int(math.log2(dim))
@@ -155,29 +146,13 @@ def pauli_measurement(
     # Define Pauli matrices
     # ---------------------------------------------------------
 
-    I = xp.asarray(
-        [[1, 0], [0, 1]],
-        dtype=rho.dtype,
-        device=rho.device
-    )
+    I = xp.asarray([[1, 0], [0, 1]], dtype=rho.dtype, device=rho.device)
 
-    X = xp.asarray(
-        [[0, 1], [1, 0]],
-        dtype=rho.dtype,
-        device=rho.device
-    )
+    X = xp.asarray([[0, 1], [1, 0]], dtype=rho.dtype, device=rho.device)
 
-    Y = xp.asarray(
-        [[0, -1j], [1j, 0]],
-        dtype=rho.dtype,
-        device=rho.device
-    )
+    Y = xp.asarray([[0, -1j], [1j, 0]], dtype=rho.dtype, device=rho.device)
 
-    Z = xp.asarray(
-        [[1, 0], [0, -1]],
-        dtype=rho.dtype,
-        device=rho.device
-    )
+    Z = xp.asarray([[1, 0], [0, -1]], dtype=rho.dtype, device=rho.device)
 
     # ---------------------------------------------------------
     # Construct projectors
@@ -196,13 +171,7 @@ def pauli_measurement(
 
     paulis = xp.stack([X, Y, Z])
 
-    projectors = xp.stack(
-        [
-            (I + paulis) / 2,
-            (I - paulis) / 2
-        ],
-        axis=1
-    )
+    projectors = xp.stack([ (I + paulis)/2, (I - paulis)/2], axis=1)
 
     # Shape:
     # (3, 2, 2, 2)
@@ -277,11 +246,7 @@ def pauli_measurement(
             #
             # (num_outcomes, 2, d, 2, d)
             #
-            combined = xp.einsum(
-                "aij,bkl->abikjl",
-                projector_stack,
-                local_projectors
-            )
+            combined = xp.einsum("aij,bkl->abikjl", projector_stack, local_projectors)
 
             # Combine the two outcome axes
             #
@@ -294,8 +259,7 @@ def pauli_measurement(
             num_outcomes *= 2
             matrix_dim *= 2
 
-            projector_stack = xp.reshape(
-                combined,
+            projector_stack = xp.reshape(combined,
                 (
                     num_outcomes,
                     matrix_dim,
@@ -347,32 +311,17 @@ def pauli_measurement(
         # Multinomial sampling
         # -----------------------------------------------------
 
-        sampled_counts = multinomial(
-            rng,
-            N,
-            probabilities,
+        sampled_counts = multinomial(rng, N, probabilities,
             xp
         )
 
         count_rows.append(sampled_counts)
 
-    # ---------------------------------------------------------
-    # Stack results
-    # ---------------------------------------------------------
-
     counts = xp.stack(count_rows)
-
-    # ---------------------------------------------------------
-    # Sanity check
-    # ---------------------------------------------------------
 
     assert xp.all(
         xp.sum(counts, axis=-1) == N
     )
-
-    # ---------------------------------------------------------
-    # Return result
-    # ---------------------------------------------------------
 
     return PauliMeasurementResult(
         measurements=measurements,
