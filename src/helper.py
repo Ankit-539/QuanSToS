@@ -110,7 +110,7 @@ def benchmark_pauli_measurement(func, rho, N, xp, rng, repeats=5):
         Mean runtime in milliseconds.
     """
 
-    func(rho, N)
+    func(rho, N, rng)
 
     times = []
 
