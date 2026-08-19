@@ -83,3 +83,51 @@ def benchmark_function(func, n_values, xp, rng, repeats=10):
         times.append(np.mean(run_times))
 
     return times
+
+from time import perf_counter
+
+
+def benchmark_pauli_measurement(func, rho, N, xp, repeats=5):
+    """
+    Benchmark a Pauli measurement function.
+
+    Parameters
+    ----------
+    func : callable
+        Pauli measurement function.
+    rho : Array
+        Density matrix to measure.
+    N : int
+        Number of measurement repetitions.
+    xp : ArrayNamespace
+        Array API namespace.
+    repeats : int
+        Number of benchmark repetitions.
+
+    Returns
+    -------
+    float
+        Mean runtime in milliseconds.
+    """
+
+    func(rho, N)
+
+    times = []
+
+    for _ in range(repeats):
+
+        if xp.__name__ == "cupy":
+            xp.cuda.Stream.null.synchronize()
+
+        start = perf_counter()
+
+        func(rho, N)
+
+        if xp.__name__ == "cupy":
+            xp.cuda.Stream.null.synchronize()
+
+        end = perf_counter()
+
+        times.append((end - start) * 1000)
+
+    return np.mean(times)
