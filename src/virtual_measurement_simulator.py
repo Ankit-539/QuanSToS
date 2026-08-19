@@ -3,6 +3,7 @@ import array_api_compat
 from itertools import product
 import math
 import numpy as np
+import cupy as cp
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 
