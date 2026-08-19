@@ -87,7 +87,7 @@ def benchmark_function(func, n_values, xp, rng, repeats=10):
 from time import perf_counter
 
 
-def benchmark_pauli_measurement(func, rho, N, xp, repeats=5):
+def benchmark_pauli_measurement(func, rho, N, xp, rng, repeats=5):
     """
     Benchmark a Pauli measurement function.
 
@@ -121,7 +121,7 @@ def benchmark_pauli_measurement(func, rho, N, xp, repeats=5):
 
         start = perf_counter()
 
-        func(rho, N)
+        func(rho, N, rng)
 
         if xp.__name__ == "cupy":
             xp.cuda.Stream.null.synchronize()
