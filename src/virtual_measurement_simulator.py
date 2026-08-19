@@ -84,30 +84,64 @@ def to_numpy(array):
 def multinomial(rng, N, probabilities, xp):
     """
     Sample from a multinomial distribution using the backend RNG.
+
+    Parameters
+    ----------
+    rng :
+        Backend-specific random number generator.
+
+    N : int
+        Number of samples.
+
+    probabilities : Array
+        Probability vector.
+
+    xp : ArrayNamespace
+        Array API namespace corresponding to the backend.
+
+    Returns
+    -------
+    counts : Array
+        Multinomial sample counts.
     """
 
     # NumPy
     if isinstance(rng, np.random.Generator):
-        sampled = rng.multinomial(
-            N,
-            np.asarray(probabilities)
-        )
+        probabilities_np = np.asarray(probabilities)
+        counts_np = rng.multinomial(N, probabilities_np)
 
         return xp.asarray(
-            sampled,
-            dtype=xp.int64,
-            device=probabilities.device
+            counts_np,
+            dtype=xp.int64
         )
 
-    # CuPy
-    if hasattr(rng, "multinomial"):
-        return rng.multinomial(N, probabilities)
+    # NumPy legacy RandomState
+    if isinstance(rng, np.random.RandomState):
+        probabilities_np = np.asarray(probabilities)
+        counts_np = rng.multinomial(N, probabilities_np)
+
+        return xp.asarray(
+            counts_np,
+            dtype=xp.int64
+        )
+
+    # CuPy RandomState
+    if isinstance(rng, cp.random.RandomState):
+        return rng.multinomial(
+            N,
+            probabilities
+        )
+
+    # CuPy Generator
+    if isinstance(rng, cp.random.Generator):
+        return rng.multinomial(
+            N,
+            probabilities
+        )
 
     raise NotImplementedError(
         f"Multinomial sampling is not implemented for RNG type {type(rng)}"
     )
-
-    raise NotImplementedError(f"Multinomial sampling is not implemented for {xp.__name__}")
 
 def pauli_measurement(
     rho: Array,
