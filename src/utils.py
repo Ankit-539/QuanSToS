@@ -19,13 +19,40 @@ def fidelity(rho: Array, sigma: Array) -> float:
     -------
     float
         Fidelity of ``rho`` and ``sigma``.
+
+    Note
+    ----
+    Negative eigenvalues of ``rho`` and ``sigma`` are clipped.
     """
     xp = array_api_compat.array_namespace(rho)
     rho_sqrt = _sqrtm(rho)
     x = rho_sqrt @ sigma @ rho_sqrt
-    x_diag = xp.linalg.eigh(x)[0]
+    x_diag = xp.linalg.eigvalsh(x)[0]
     x_diag = xp.maximum(x_diag, 0)
     return (xp.sum(xp.sqrt(x_diag)))**2
+
+
+def negativity(a: Array) -> float:
+    """
+    Return the sum of negative eigenvalues of a matrix.
+
+    For eigenvalues ``λ1 <= ... <= λk < 0 <= λk+1 <= ...`` returns
+
+        ``-(λ1 + ... + λk)``
+
+
+    Parameters
+    ----------
+    a : Array
+        A Hermitian matrix.
+
+    Returns
+    -------
+    float
+        Minus sum of negative eigenvalues.
+    """
+    xp = array_api_compat.array_namespace(a)
+    return -xp.sum(xp.minimum(xp.linalg.eigvalsh(a), 0))
 
 
 def _sqrtm(a: Array) -> Array:
