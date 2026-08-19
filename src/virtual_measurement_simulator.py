@@ -110,7 +110,7 @@ def multinomial(rng, N, probabilities, xp):
 
     raise NotImplementedError(f"Multinomial sampling is not implemented for {xp.__name__}")
 
-def pauli_measurement(rho: Array, N: int) -> PauliMeasurementResult:
+def pauli_measurement(rho: Array, N: int, rng) -> PauliMeasurementResult:
     """
     For an n-qubit state ρ (``rho``), the function constructs all
     ``3^n`` Pauli measurements and simulates their outcomes ``N``
@@ -197,13 +197,9 @@ def pauli_measurement(rho: Array, N: int) -> PauliMeasurementResult:
         probabilities = probabilities / xp.sum(probabilities)
 
         # Multinomial sampling
-        numpy_probabilities = to_numpy(probabilities)
+        sampled_counts = multinomial(rng, N, probabilities, xp)
 
-        sampled_counts_np = np.random.multinomial(N, numpy_probabilities)
-
-        sampled_counts_xp = xp.asarray(sampled_counts_np, dtype=xp.int64, device=rho.device)
-
-        count_rows.append(sampled_counts_xp)
+        count_rows.append(sampled_counts)
 
     counts = xp.stack(count_rows)
 
