@@ -87,8 +87,9 @@ def multinomial(rng, N, probabilities, xp):
     Sample from a multinomial distribution using the backend RNG.
     """
 
-    # NumPy
-    if isinstance(rng, (np.random.Generator, np.random.RandomState)):
+    # NumPy / array_api_compat NumPy
+    if xp.__name__ in ("numpy", "array_api_compat.numpy"):
+
         probabilities_np = np.asarray(probabilities)
 
         counts = rng.multinomial(
@@ -101,15 +102,16 @@ def multinomial(rng, N, probabilities, xp):
             dtype=xp.int64
         )
 
-    # CuPy
-    if isinstance(rng, cp.random.RandomState):
+    # CuPy / array_api_compat CuPy
+    if xp.__name__ in ("cupy", "array_api_compat.cupy"):
+
         return cp.random.multinomial(
             N,
             probabilities
         )
 
     raise NotImplementedError(
-        f"Multinomial sampling is not implemented for RNG type {type(rng)}"
+        f"Multinomial sampling is not implemented for {xp.__name__}"
     )
 
 def pauli_measurement(
