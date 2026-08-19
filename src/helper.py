@@ -5,7 +5,7 @@ def bloch_vector(rho):
     """
     Convert a single-qubit density matrix to its Bloch vector.
     """
-    xp = array_api_compat.array_namespace(counts)
+    xp = array_api_compat.array_namespace(rho)
     X = xp.asarray([[0, 1], [1, 0]], dtype=rho.dtype)
     Y = xp.asarray([[0, -1j], [1j, 0]], dtype=rho.dtype)
     Z = xp.asarray([[1, 0], [0, -1]], dtype=rho.dtype)
