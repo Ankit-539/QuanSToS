@@ -61,12 +61,12 @@ def get_random_haar(n: int, xp: ArrayNamespace) -> Array:
     real = xp.asarray(real)
     imaginary = xp.asarray(imaginary)
     z = real + 1j * imaginary
-    psi_haar = z / xp.linalg.vector_norm(z)
+    psi_haar = psi_haar = z / xp.sqrt(xp.sum(xp.abs(z) ** 2))
     rho = xp.outer(psi_haar, xp.conj(psi_haar))
     return rho
 
 
-def get_random_mixed(n: int) -> Array:
+def get_random_mixed(n: int, xp: ArrayNamespace, rng) -> Array:
     """
     Generate a random mixed state on ``n`` qubits.
 
@@ -80,7 +80,49 @@ def get_random_mixed(n: int) -> Array:
     rho : (``2**n``, ``2**n``) Array
         Density matrix of a random state.
     """
-    pass
+    dimension = 2**n
+    rng = RNG(xp)
+    real = rng.normal((dimension, dimension), 0.0, 1.0)
+    imaginary = rng.normal((dimension, dimension), 0.0, 1.0)
+    real = xp.asarray(real)
+    imaginary = xp.asarray(imaginary)
+    z = real + 1j * imaginary
+    rho = xp.matmul(z, xp.conj(xp.matrix_transpose(z)))
+    rho = rho / xp.trace(rho)
+    return rho
+
+
+def get_random_product_pole_biased(n: int, xp: ArrayNamespace) -> Array:
+    """
+    Generate a random product state on ``n`` qubits, with each
+    single-qubit state sampled uniformly in theta and phi.
+
+    Parameters
+    ----------
+    n : int
+        Number of qubits.
+
+    Returns
+    -------
+    rho : (``2**n``, ``2**n``) Array
+        Density matrix of a random state.
+    """
+    psi_product = xp.asarray([1.0 + 0j])
+    rng = RNG(xp)
+
+    for _ in range(n):
+        theta = rng.uniform(1, 0.0, np.pi)[0]
+        phi = rng.uniform(1, 0.0, 2.0 * np.pi)[0]
+
+        theta = xp.asarray(theta)
+        phi = xp.asarray(phi)
+
+        psi = xp.stack([xp.cos(theta/2), xp.exp(1j*phi)*xp.sin(theta/2)])
+        psi_product = xp.kron(psi_product, psi)
+
+    rho = xp.outer(psi_product, xp.conj(psi_product))
+
+    return rho
 
 
 class RNG:
