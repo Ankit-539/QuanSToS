@@ -27,7 +27,7 @@ def fidelity(rho: Array, sigma: Array) -> float:
     xp = array_api_compat.array_namespace(rho)
     rho_sqrt = _sqrtm(rho)
     x = rho_sqrt @ sigma @ rho_sqrt
-    x_diag = xp.linalg.eigvalsh(x)[0]
+    x_diag = xp.linalg.eigvalsh(x)
     x_diag = xp.maximum(x_diag, 0)
     return (xp.sum(xp.sqrt(x_diag)))**2
 

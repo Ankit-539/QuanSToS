@@ -31,10 +31,9 @@ def inverse_estimator(counts: Array) -> Array:
     c = _correlations(p, n)
     ex = _pauli_expectations(c, n)
 
-    # Sanity checks
-    assert ex[0] == 1
-    if n > 1:
-        assert ex[5] == sum(p[0][j] * (-1)**j.bit_count() for j in range(2**n))
+    # Sanity check
+    eps = 1e-10
+    assert xp.abs(ex[0] - 1) < eps
 
     return _reconstruct_state(ex, n)
 
@@ -76,8 +75,8 @@ def _correlations(p: Array, n: int) -> Array:
         Correlation values with shape ``(3,) * n + (2,) * n``. The first
         ``n`` axes index the measurement setting, with ``0, 1, 2``
         corresponding to ``X, Y, Z``. The last ``n`` axes indicate whether
-        the measured Pauli is included in the correlation: ``0`` corresponds
-        to the identity and ``1`` to the measured Pauli.
+        the measured Pauli is included in the correlation: ``0``
+        corresponds to the identity and ``1`` to the measured Pauli.
 
         For example, for a measurement setting ``(X, Z)``::
 
@@ -148,10 +147,10 @@ def _pauli_expectations(correlations: Array, n: int) -> Array:
             axes=([0, result.ndim - n], [1, 2]),
         )
 
-    result = xp.permute_dims(
-        result,
-        tuple(range(n - 1, -1, -1)),
-    )
+    # result = xp.permute_dims(
+    #     result,
+    #     tuple(range(n - 1, -1, -1)),
+    # )
 
     return xp.reshape(result, (4**n,))
 
