@@ -54,7 +54,7 @@ def get_random_haar(n: int, xp: ArrayNamespace, rng) -> Array:
     return rho
 
 
-def get_random_mixed(n: int) -> Array:
+def get_random_mixed(n: int, xp: ArrayNamespace, rng) -> Array:
     """
     Generate a random mixed state on ``n`` qubits.
 
@@ -68,4 +68,12 @@ def get_random_mixed(n: int) -> Array:
     rho : (``2**n``, ``2**n``) Array
         Density matrix of a random state.
     """
-    pass
+    dimension = 2**n
+    real = rng.normal(0.0, 1.0, (dimension, dimension))
+    imaginary = rng.normal(0.0, 1.0, (dimension, dimension))
+    real = xp.asarray(real)
+    imaginary = xp.asarray(imaginary)
+    z = real + 1j * imaginary
+    rho = xp.matmul(z, xp.conj(xp.matrix_transpose(z)))
+    rho = rho / xp.trace(rho)
+    return rho
