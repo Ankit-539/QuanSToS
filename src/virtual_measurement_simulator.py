@@ -83,30 +83,29 @@ def to_numpy(array):
 
 def multinomial(rng, N, probabilities, xp):
     """
-    Draw samples from a multinomial distribution.
-
-    Parameters
-    ----------
-    rng : backend-specific random number generator
-        Random number generator for the selected backend.
-    N : int
-        Number of samples.
-    probabilities : Array
-        Probability vector.
-    xp : ArrayNamespace
-        Array API namespace.
-
-    Returns
-    -------
-    counts : Array
-        Sampled counts.
+    Sample from a multinomial distribution using the backend RNG.
     """
 
-    if xp.__name__ == "numpy":
-        return xp.asarray(rng.multinomial(N, probabilities))
+    # NumPy
+    if isinstance(rng, np.random.Generator):
+        sampled = rng.multinomial(
+            N,
+            np.asarray(probabilities)
+        )
 
-    if xp.__name__ == "cupy":
+        return xp.asarray(
+            sampled,
+            dtype=xp.int64,
+            device=probabilities.device
+        )
+
+    # CuPy
+    if hasattr(rng, "multinomial"):
         return rng.multinomial(N, probabilities)
+
+    raise NotImplementedError(
+        f"Multinomial sampling is not implemented for RNG type {type(rng)}"
+    )
 
     raise NotImplementedError(f"Multinomial sampling is not implemented for {xp.__name__}")
 
