@@ -85,57 +85,25 @@ def to_numpy(array):
 def multinomial(rng, N, probabilities, xp):
     """
     Sample from a multinomial distribution using the backend RNG.
-
-    Parameters
-    ----------
-    rng :
-        Backend-specific random number generator.
-
-    N : int
-        Number of samples.
-
-    probabilities : Array
-        Probability vector.
-
-    xp : ArrayNamespace
-        Array API namespace corresponding to the backend.
-
-    Returns
-    -------
-    counts : Array
-        Multinomial sample counts.
     """
 
     # NumPy
-    if isinstance(rng, np.random.Generator):
+    if isinstance(rng, (np.random.Generator, np.random.RandomState)):
         probabilities_np = np.asarray(probabilities)
-        counts_np = rng.multinomial(N, probabilities_np)
 
-        return xp.asarray(
-            counts_np,
-            dtype=xp.int64
-        )
-
-    # NumPy legacy RandomState
-    if isinstance(rng, np.random.RandomState):
-        probabilities_np = np.asarray(probabilities)
-        counts_np = rng.multinomial(N, probabilities_np)
-
-        return xp.asarray(
-            counts_np,
-            dtype=xp.int64
-        )
-
-    # CuPy RandomState
-    if isinstance(rng, cp.random.RandomState):
-        return rng.multinomial(
+        counts = rng.multinomial(
             N,
-            probabilities
+            probabilities_np
         )
 
-    # CuPy Generator
-    if isinstance(rng, cp.random.Generator):
-        return rng.multinomial(
+        return xp.asarray(
+            counts,
+            dtype=xp.int64
+        )
+
+    # CuPy
+    if isinstance(rng, cp.random.RandomState):
+        return cp.random.multinomial(
             N,
             probabilities
         )
